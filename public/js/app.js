@@ -35,7 +35,7 @@ const emailValid = data => emailReg.test(data.email) ? { value: true, ...data } 
 const validateLogin = R.compose(emailValid, pwdValid)
 
 const login = ({ email, pwd }) => {
-  
+
 }
 
 const submitLogin = ctx => {
@@ -85,8 +85,19 @@ const Login = {
 }
 
 const Repo = {
-} 
+  view() {
+    return m('h2', 'Repository List')
+  }
+}
 
-const { login } = storage.get('state') || { login: false }
+const App = {
+  oninit() {
+    const { login } = storage.get('state') || { login: false }
+    this.login = login
+  },
+  view() {
+    return !this.login ? m(Login) : m(Repo)
+  }
+}
 
-m.mount(root, !login ? Login : Repo)
+m.mount(root, App)
