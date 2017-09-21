@@ -15,6 +15,7 @@
 }
 
 .dialogContent {
+  position: relative;
   background: #fff;
   padding: 40px;
   width: 30%;
@@ -25,4 +26,12 @@
 
 .dialogContent h2 {
     margin-top: 0;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-right: 20px;
+  margin-top: 20px;
 }
