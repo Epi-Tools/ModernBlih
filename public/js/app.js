@@ -34,6 +34,7 @@ const storage = mx.storage()
 const stateChange = {
   state: {
     username: '',
+    token: '',
     login: false,
     showLoginModal: {
       value: false
@@ -65,14 +66,26 @@ const spin = R.compose(newSpin, getId)
 
 const stop = spin => spin.stop()
 
+const setStorage = (key, props) => new Promise(s => {
+  storage.set('state', props)
+  s()
+})
+
 const login = ctx => {
   const logSpin = spin('loginSpin')
   ctx.showLoginButton = false
-  return axios.get('/api/auth').then(token => {
-    wesh(token)
+  return axios.get('/api/auth').then(({ data }) => {
+    stateChange.state.token = data.token
+    stateChange.state.username = ctx.email
+    stateChange.state.login = true
+    return setStorage('state', stateChange.state).then(() => {
+      stop(logSpin)
+      ctx.showLoginButton = true
+      m.redraw()
+    })
   }).catch(() => {
+    wesh('error')
     ctx.errorValidation = 'Wrong Auth Info'
-  }).then(() => {
     stop(logSpin)
     ctx.showLoginButton = true
     m.redraw()
@@ -133,13 +146,12 @@ const Repo = {
   }
 }
 
+const getLogin = () => storage.get('state') || { login: false }
+
 const App = {
-  oninit() {
-    const { login } = storage.get('state') || { login: false }
-    this.login = login
-  },
   view() {
-    return !this.login ? m(Login) : m(Repo)
+    const isLogin = stateChange.state.login || getLogin().login
+    return !isLogin ? m(Login) : m(Repo)
   }
 }
 
