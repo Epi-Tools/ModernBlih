@@ -68,6 +68,15 @@ const stop = spin => spin.stop()
 const login = ctx => {
   const logSpin = spin('loginSpin')
   ctx.showLoginButton = false
+  return axios.get('/api/auth').then(token => {
+    wesh(token)
+  }).catch(() => {
+    ctx.errorValidation = 'Wrong Auth Info'
+  }).then(() => {
+    stop(logSpin)
+    ctx.showLoginButton = true
+    m.redraw()
+  })
 }
 
 const submitLogin = ctx => {
