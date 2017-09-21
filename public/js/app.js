@@ -1,3 +1,3 @@
-const root = document.getElementById("app")
+const root = document.getElementById('app')
 
-m.render(root, m("button", "Se connecter"))
+m.render(root, m('button', 'Se connecter'))

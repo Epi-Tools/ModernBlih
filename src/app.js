@@ -12,7 +12,8 @@ const repo = require('./routes/repo/repo')
 
 const app = express()
 const server = require('http').createServer(app)
-const PORT = process.env.PORT
+
+const { PORT } = process.env
 
 const wesh = console.log
 
@@ -21,7 +22,7 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
+// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -48,9 +49,11 @@ app.use((err, req, res, next) => {
   res.render('error')
 })
 
-const handleError = err => {
-    wesh(err)
-    process.exit(1)
+const handleError = (err) => {
+  wesh(err)
+  process.exit(1)
 }
 
-const listenServer = server.listen(PORT, err => err ? handleError(err) : wesh(`App listen to ${PORT}`))
+const listenHandler = err => err ? handleError(err) : wesh(`App listen to ${PORT}`)
+
+server.listen(PORT, listenHandler)
