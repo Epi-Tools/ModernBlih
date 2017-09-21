@@ -3,6 +3,7 @@
     "rules": {
         "semi": [2, "never"],
         "no-confusing-arrow": 0,
-        "comma-dangle": 0
+        "comma-dangle": 0,
+        "no-return-assign": 0
     }
 }

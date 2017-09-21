@@ -1,8 +1,28 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.content {
+  background: #fff;
+  min-height: 400px;
+  padding: 20px;
 }
 
-a {
-  color: #00B7FF;
+.dialog {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.35);
+  padding: 40px;
+}
+
+.dialogContent {
+  background: #fff;
+  padding: 40px;
+  width: 30%;
+  height: 30%;
+  margin: auto;
+  margin-top: 200px;
+}
+
+.dialogContent h2 {
+    margin-top: 0;
 }
