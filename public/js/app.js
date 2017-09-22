@@ -152,12 +152,16 @@ const Login = {
 
 const Repo = {
   view() {
-    this.repoList = storage.get('state').repoList.value
-    stateChange.state.repoList.value = this.repoList
+    const state = storage.get('state')
+    this.repoList = state.repoList.value
+    this.username = state.username.value
+    stateChange.state = state
     return m('.repoList', [
-      m('h2', 'Repository List'),
+      m('h4', `Repositories List from ${this.username}`),
+      m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
+      m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [
-        Object.keys(this.repoList).map(e => m('li', e))
+        Object.keys(this.repoList).map(e => m('li', e, [m('button', { style: 'margin-left: 40px;' }, 'Edit')]))
       ])
     ])
   }
