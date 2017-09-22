@@ -33,9 +33,18 @@ const storage = mx.storage()
 
 const stateChange = {
   state: {
-    username: '',
-    token: '',
-    login: false,
+    username: {
+      value: ''
+    },
+    token: {
+      value: ''
+    },
+    login: {
+      value: false
+    },
+    repoList: {
+      value: {}
+    },
     showLoginModal: {
       value: false
     }
@@ -43,7 +52,7 @@ const stateChange = {
   history: [],
   stateMutate(name, props) {
     if (!this.state[name]) return
-    if (typeof props !== 'object') props = { value: props }
+    props = { value: props }
     this.history.push({ action: name, value: props, old: Object.assign({}, this.state) })
     this.state[name] = Object.assign(this.state[name], props)
   }
@@ -73,17 +82,18 @@ const setStorage = (key, props) => new Promise(s => s(storage.set('state', props
 const login = ctx => {
   const logSpin = spin('loginSpin')
   ctx.showLoginButton = false
-  return axios('/api/auth').then(data => {
-    wesh(data)
+  return axios.post('/api/auth', { email: ctx.email, pwd: ctx.pwd }).then(({ data }) => {
     stateChange.stateMutate('username', ctx.email)
     stateChange.stateMutate('login', true)
+    stateChange.stateMutate('token', data.token)
+    stateChange.stateMutate('repoList', data.body.repositories)
     return setStorage('state', stateChange.state).then(() => {
       stop(logSpin)
       ctx.showLoginButton = true
       m.redraw()
     })
-  }).catch(() => {
-    wesh('error')
+  }).catch(err => {
+    wesh(err)
     ctx.errorValidation = 'Wrong Auth Info'
     stop(logSpin)
     ctx.showLoginButton = true
@@ -132,6 +142,7 @@ const LoginModal = {
   ]))
 }
 
+// TODO: add logout
 const Login = {
   view: () => m('main', [
     m('button', { onclick: () => stateChange.stateMutate('showLoginModal', true), class: 'button' }, 'Login'),
@@ -141,7 +152,14 @@ const Login = {
 
 const Repo = {
   view() {
-    return m('h2', 'Repository List')
+    this.repoList = storage.get('state').repoList.value
+    stateChange.state.repoList.value = this.repoList
+    return m('.repoList', [
+      m('h2', 'Repository List'),
+      m('ul', [
+        Object.keys(this.repoList).map(e => m('li', e))
+      ])
+    ])
   }
 }
 
@@ -149,7 +167,7 @@ const getLogin = () => storage.get('state') || { login: false }
 
 const App = {
   view() {
-    const isLogin = stateChange.state.login || getLogin().login
+    const isLogin = stateChange.state.login.value || getLogin().login.value
     return !isLogin ? m(Login) : m(Repo)
   }
 }
