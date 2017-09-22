@@ -15,6 +15,7 @@
     "nodemon": "^1.12.1",
     "pug": "~2.0.0-beta11",
     "ramda": "^0.24.1",
+    "request": "^2.82.0",
     "serve-favicon": "~2.4.2"
   },
   "devDependencies": {

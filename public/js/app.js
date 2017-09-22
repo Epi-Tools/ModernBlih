@@ -40,9 +40,11 @@ const stateChange = {
       value: false
     }
   },
+  history: [],
   stateMutate(name, props) {
     if (!this.state[name]) return
     if (typeof props !== 'object') props = { value: props }
+    this.history.push({ action: name, value: props, old: Object.assign({}, this.state) })
     this.state[name] = Object.assign(this.state[name], props)
   }
 }
@@ -66,18 +68,15 @@ const spin = R.compose(newSpin, getId)
 
 const stop = spin => spin.stop()
 
-const setStorage = (key, props) => new Promise(s => {
-  storage.set('state', props)
-  s()
-})
+const setStorage = (key, props) => new Promise(s => s(storage.set('state', props)))
 
 const login = ctx => {
   const logSpin = spin('loginSpin')
   ctx.showLoginButton = false
-  return axios.get('/api/auth').then(({ data }) => {
-    stateChange.state.token = data.token
-    stateChange.state.username = ctx.email
-    stateChange.state.login = true
+  return axios('/api/auth').then(data => {
+    wesh(data)
+    stateChange.stateMutate('username', ctx.email)
+    stateChange.stateMutate('login', true)
     return setStorage('state', stateChange.state).then(() => {
       stop(logSpin)
       ctx.showLoginButton = true
