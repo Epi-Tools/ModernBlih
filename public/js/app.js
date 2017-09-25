@@ -114,6 +114,13 @@ const submitLogin = ctx => {
   login(ctx)
 }
 
+const logout = () => {
+  stateChange.stateMutate('token', '')
+  stateChange.stateMutate('login', false)
+  setStorage('state', stateChange.state)
+  m.redraw()
+}
+
 const LoginForm = {
   oninit() {
     this.errorValidation = null
@@ -180,7 +187,8 @@ const Repo = {
     return m('.repoList', [
       m('h4', `Repositories List from ${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
-      m('button', { onclick: () => stateChange.stateMutate('showCreateModal', true) }, 'Create Repo'),
+      m('button', { onclick: () => stateChange.stateMutate('showCreateModal', true), class: 'create-button' }, 'Create Repo'),
+      m('button', { onclick: () => logout(), class: 'logout-button' }, 'Logout'),
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [

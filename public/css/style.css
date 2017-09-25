@@ -35,3 +35,19 @@
   margin-right: 20px;
   margin-top: 20px;
 }
+
+.repoList {
+  position: relative;
+}
+
+.logout-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.create-button {
+  position: absolute;
+  right: 0;
+  top: 1;
+}
