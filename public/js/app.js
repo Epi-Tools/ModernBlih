@@ -193,6 +193,9 @@ const AddForm = {
   }
 }
 
+const edit = ctx => {
+}
+
 const EditForm = {
   oninit() {
     this.name = null
@@ -280,19 +283,15 @@ const App = {
 
 m.mount(root, App)
 
-const handleEnter = () => {
-}
-
 const hanldeEscape = () => {
   const { state } = stateChange
   if (state.showCreateModal.value !== true &&
       state.showLoginModal.value !== true &&
-      state.showAddModal.value !== true) return
+      state.showEditModal.value !== true) return
   closeModal()
 }
 
 window.addEventListener('keydown', e => {
-  if (e.keyCode === 13) return handleEnter()
-  else if (e.keyCode === 27) return hanldeEscape()
+  if (e.keyCode === 27) return hanldeEscape()
   return e
 })
