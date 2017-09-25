@@ -231,7 +231,7 @@ const Repo = {
     return m('.repoList', [
       m('h4', `Repositories List from ${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
-      m('button', { onclick: () => openCreateModal(), class: 'create-button' }, 'Create Repo'),
+      m('button', { onclick: openCreateModal, class: 'create-button' }, 'Create Repo'),
       m('button', { onclick: logout, class: 'logout-button' }, 'Logout'),
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
