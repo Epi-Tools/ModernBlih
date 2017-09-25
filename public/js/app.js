@@ -50,6 +50,9 @@ const stateChange = {
     },
     showCreateModal: {
       value: false
+    },
+    showEditModal: {
+      value: false
     }
   },
   history: [],
@@ -66,6 +69,7 @@ const setStorage = (key, props) => new Promise(s => s(storage.set('state', props
 const closeModal = () => {
   stateChange.stateMutate('showLoginModal', false)
   stateChange.stateMutate('showCreateModal', false)
+  stateChange.stateMutate('showEditModal', false)
   setStorage('state', stateChange.state)
   m.redraw()
 }
@@ -210,18 +214,46 @@ const AddForm = {
   }
 }
 
-const CreateModal = {
-  view: () => m('.dialog', m('.dialogContent', [
-    m('h2', 'Name'),
-    m('button', { onclick: closeModal, class: 'dialog-close' }, 'Close'),
-    m(AddForm)
-  ]))
+const EditForm = {
+  oninit() {
+    this.name = null
+    this.acl = false
+    this.showEditButton = true
+    this.errorValidation = null
+  },
+  view() {
+    return m('div', [
+      m('label.label', { for: 'name' }, 'Name'),
+      m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
+        onchange: e => this.name = e.target.value }),
+      m('label.label', { for: 'acl' }, 'Acl ramassage-tek'),
+      m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
+      m('br'),
+      this.showEditButton ? m('button', { onclick: () => addSubmit(this) }, 'Login') : null,
+      this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
+      m('span', { id: 'AddSpin' })
+    ])
+  }
 }
 
-const openCreateModal = () => {
-  stateChange.stateMutate('showCreateModal', true)
+const getModalPattern = (form, title) => m('.dialog', m('.dialogContent', [
+  m('h2', title),
+  m('button', { onclick: closeModal, class: 'dialog-close' }, 'Close'),
+  m(form)
+]))
+
+const CreateModal = { view: () => getModalPattern(AddForm, 'Create Repo') }
+
+const EditModal = { view: () => getModalPattern(EditForm, 'Edit Repo') }
+
+const openModal = msg => {
+  stateChange.stateMutate(msg, true)
   setStorage('state', stateChange.state)
 }
+
+const openCreateModal = () => openModal('showCreateModal')
+
+const openEditModal = () => openModal('showEditModal')
 
 // TODO: search bar
 const Repo = {
@@ -234,9 +266,10 @@ const Repo = {
       m('button', { onclick: openCreateModal, class: 'create-button' }, 'Create Repo'),
       m('button', { onclick: logout, class: 'logout-button' }, 'Logout'),
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
+      stateChange.state.showEditModal.value ? m(EditModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [
-        Object.keys(this.repoList).map(e => m('li', e, [m('button', { class: 'edit-button' }, 'Edit')]))
+        Object.keys(this.repoList).map(e => m('li', e, [m('button', { onclick: openEditModal, class: 'edit-button' }, 'Edit')]))
       ])
     ])
   }
