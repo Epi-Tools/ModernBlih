@@ -61,8 +61,12 @@ const stateChange = {
   }
 }
 
+const setStorage = (key, props) => new Promise(s => s(storage.set('state', props)))
+
 const closeModal = () => {
   stateChange.stateMutate('showLoginModal', false)
+  stateChange.stateMutate('showCreateModal', false)
+  setStorage('state', stateChange.state)
   m.redraw()
 }
 
@@ -79,8 +83,6 @@ const newSpin = id => new Spinner(opts).spin(id)
 const spin = R.compose(newSpin, getId)
 
 const stop = spin => spin.stop()
-
-const setStorage = (key, props) => new Promise(s => s(storage.set('state', props)))
 
 const login = ctx => {
   const logSpin = spin('loginSpin')
@@ -152,7 +154,7 @@ const LoginModal = {
   ]))
 }
 
-// TODO: add logout && token front hash
+// TODO: token front hash
 const Login = {
   view: () => m('main', [
     m('button', { onclick: () => stateChange.stateMutate('showLoginModal', true) }, 'Login'),
@@ -160,13 +162,29 @@ const Login = {
   ])
 }
 
-// TODO: add acl button and name field
+const addSubmit = ctx => {
+
+}
+
 const AddForm = {
   oninit() {
     this.name = null
     this.acl = false
+    this.showAddButton = true
+    this.errorValidation = null
   },
   view() {
+    return m('div', [
+      m('label.label', { for: 'login' }, 'Login'),
+      m('input.input[type=email][placeholder=Login]', { id: 'login', name: 'login', required: 'required',
+        onchange: e => this.name = e.target.value }),
+      m('label.label', { for: 'acl'}, 'Acl ramassage-tek'),
+      m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
+      m('br'),
+      this.showAddButton ? m('button', { onclick: () => addSubmit(this) }, 'Login') : null,
+      this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
+      m('span', { id: 'loginSpin' })
+    ])
   }
 }
 
@@ -178,16 +196,20 @@ const CreateModal = {
   ]))
 }
 
+const openCreateModal = () => {
+  stateChange.stateMutate('showCreateModal', true)
+  setStorage('state', stateChange.state)
+}
+
+// TODO: search bar
 const Repo = {
   view() {
-    const state = storage.get('state')
-    this.repoList = state.repoList.value
-    this.username = state.username.value
-    stateChange.state = state
+    this.repoList = stateChange.state.repoList.value
+    this.username = stateChange.state.username.value
     return m('.repoList', [
       m('h4', `Repositories List from ${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
-      m('button', { onclick: () => stateChange.stateMutate('showCreateModal', true), class: 'create-button' }, 'Create Repo'),
+      m('button', { onclick: () => openCreateModal(), class: 'create-button' }, 'Create Repo'),
       m('button', { onclick: () => logout(), class: 'logout-button' }, 'Logout'),
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
@@ -202,6 +224,9 @@ const getLogin = () => storage.get('state') || { login: false }
 
 const App = {
   view() {
+    const state = storage.get('state')
+    if (state === null || state === undefined) return m(Login)
+    stateChange.state = state
     const isLogin = stateChange.state.login.value || getLogin().login.value
     return !isLogin ? m(Login) : m(Repo)
   }
