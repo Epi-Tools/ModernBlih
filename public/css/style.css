@@ -17,9 +17,11 @@
 
 .dialogContent {
   position: relative;
+  text-align: center;
+  vertical-align: middle;
   background: #fff;
   padding: 40px;
-  width: 30%;
+  width: 20%;
   height: 30%;
   margin: auto;
   margin-top: 200px;

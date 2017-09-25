@@ -156,27 +156,6 @@ const LoginForm = {
   }
 }
 
-const LoginModal = {
-  view: () => m('.dialog', m('.dialogContent', [
-    m('h2', 'Login'),
-    m('button', { onclick: closeModal, class: 'dialog-close' }, 'Close'),
-    m(LoginForm)
-  ]))
-}
-
-const openLoginModal = () => {
-  stateChange.stateMutate('showLoginModal', true)
-  setStorage('state', stateChange.state)
-}
-
-// FIXME: token front hash
-const Login = {
-  view: () => m('main', [
-    m('button', { onclick: openLoginModal }, 'Login'),
-    stateChange.state.showLoginModal.value ? m(LoginModal) : null
-  ])
-}
-
 const add = ctx => {
   wesh(ctx.name)
   wesh(ctx.acl)
@@ -207,7 +186,7 @@ const AddForm = {
       m('label.label', { for: 'acl' }, 'Acl ramassage-tek'),
       m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
       m('br'),
-      this.showAddButton ? m('button', { onclick: () => addSubmit(this) }, 'Login') : null,
+      this.showAddButton ? m('button', { onclick: () => addSubmit(this) }, 'Add') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
       m('span', { id: 'AddSpin' })
     ])
@@ -229,7 +208,7 @@ const EditForm = {
       m('label.label', { for: 'acl' }, 'Acl ramassage-tek'),
       m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
       m('br'),
-      this.showEditButton ? m('button', { onclick: () => addSubmit(this) }, 'Login') : null,
+      this.showEditButton ? m('button', { onclick: () => addSubmit(this) }, 'Edit') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
       m('span', { id: 'AddSpin' })
     ])
@@ -246,6 +225,8 @@ const CreateModal = { view: () => getModalPattern(AddForm, 'Create Repo') }
 
 const EditModal = { view: () => getModalPattern(EditForm, 'Edit Repo') }
 
+const LoginModal = { view: () => getModalPattern(LoginForm, 'Login') }
+
 const openModal = msg => {
   stateChange.stateMutate(msg, true)
   setStorage('state', stateChange.state)
@@ -254,6 +235,16 @@ const openModal = msg => {
 const openCreateModal = () => openModal('showCreateModal')
 
 const openEditModal = () => openModal('showEditModal')
+
+const openLoginModal = () => openModal('showLoginModal')
+
+// FIXME: token front hash
+const Login = {
+  view: () => m('main', [
+    m('button', { onclick: openLoginModal }, 'Login'),
+    stateChange.state.showLoginModal.value ? m(LoginModal) : null
+  ])
+}
 
 // TODO: search bar
 const Repo = {
@@ -288,3 +279,20 @@ const App = {
 }
 
 m.mount(root, App)
+
+const handleEnter = () => {
+}
+
+const hanldeEscape = () => {
+  const { state } = stateChange
+  if (state.showCreateModal.value !== true &&
+      state.showLoginModal.value !== true &&
+      state.showAddModal.value !== true) return
+  closeModal()
+}
+
+window.addEventListener('keydown', e => {
+  if (e.keyCode === 13) return handleEnter()
+  else if (e.keyCode === 27) return hanldeEscape()
+  return e
+})
