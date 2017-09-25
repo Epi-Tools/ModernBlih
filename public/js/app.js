@@ -74,7 +74,13 @@ const pwdValid = data => data.pwd.length >= 8 ? { value: true, ...data } : { val
 
 const emailValid = data => emailReg.test(data.email) ? { value: true, ...data } : { value: false, error: 'Wrong Email', ...data }
 
+const nameValid = data => data.name.length >= 2 ? { value: true, ...data } : { value: false, error: 'Wrong Name', ...data }
+
+const aclValid = data => data.acl === true || data.acl === false ? { value: true, ...data } : { value: false, error: 'Wrong acl', ...data }
+
 const validateLogin = R.compose(emailValid, pwdValid)
+
+const validateAdd = R.compose(aclValid, nameValid)
 
 const getId = id => document.getElementById(id)
 
@@ -107,9 +113,9 @@ const login = ctx => {
 }
 
 const submitLogin = ctx => {
-  const valid = validateLogin(ctx)
-  if (valid.error) {
-    ctx.errorValidation = valid.error
+  const { error } = validateLogin(ctx)
+  if (error) {
+    ctx.errorValidation = error
     return
   }
   ctx.errorValidation = null
@@ -154,16 +160,31 @@ const LoginModal = {
   ]))
 }
 
-// TODO: token front hash
+const openLoginModal = () => {
+  stateChange.stateMutate('showLoginModal', true)
+  setStorage('state', stateChange.state)
+}
+
+// FIXME: token front hash
 const Login = {
   view: () => m('main', [
-    m('button', { onclick: () => stateChange.stateMutate('showLoginModal', true) }, 'Login'),
+    m('button', { onclick: openLoginModal }, 'Login'),
     stateChange.state.showLoginModal.value ? m(LoginModal) : null
   ])
 }
 
-const addSubmit = ctx => {
+const add = ctx => {
+  wesh('add')
+}
 
+const addSubmit = ctx => {
+  const { error } = validateAdd(ctx)
+  if (error) {
+    ctx.errorValidation = error
+    return
+  }
+  ctx.errorValidation = null
+  add(ctx)
 }
 
 const AddForm = {
@@ -175,22 +196,22 @@ const AddForm = {
   },
   view() {
     return m('div', [
-      m('label.label', { for: 'login' }, 'Login'),
-      m('input.input[type=email][placeholder=Login]', { id: 'login', name: 'login', required: 'required',
+      m('label.label', { for: 'name' }, 'Name'),
+      m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
-      m('label.label', { for: 'acl'}, 'Acl ramassage-tek'),
+      m('label.label', { for: 'acl' }, 'Acl ramassage-tek'),
       m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
       m('br'),
       this.showAddButton ? m('button', { onclick: () => addSubmit(this) }, 'Login') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
-      m('span', { id: 'loginSpin' })
+      m('span', { id: 'AddSpin' })
     ])
   }
 }
 
 const CreateModal = {
   view: () => m('.dialog', m('.dialogContent', [
-    m('h2', 'Login'),
+    m('h2', 'Name'),
     m('button', { onclick: closeModal, class: 'dialog-close' }, 'Close'),
     m(AddForm)
   ]))
