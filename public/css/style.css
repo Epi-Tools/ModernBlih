@@ -51,3 +51,8 @@
   right: 0;
   top: 1;
 }
+
+.edit-button {
+  position: absolute;
+  right: 0;
+}

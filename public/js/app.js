@@ -174,7 +174,8 @@ const Login = {
 }
 
 const add = ctx => {
-  wesh('add')
+  wesh(ctx.name)
+  wesh(ctx.acl)
 }
 
 const addSubmit = ctx => {
@@ -235,7 +236,7 @@ const Repo = {
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [
-        Object.keys(this.repoList).map(e => m('li', e, [m('button', { style: 'margin-left: 40px;' }, 'Edit')]))
+        Object.keys(this.repoList).map(e => m('li', e, [m('button', { class: 'edit-button' }, 'Edit')]))
       ])
     ])
   }
