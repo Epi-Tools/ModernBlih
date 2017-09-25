@@ -47,6 +47,9 @@ const stateChange = {
     },
     showLoginModal: {
       value: false
+    },
+    showCreateModal: {
+      value: false
     }
   },
   history: [],
@@ -142,12 +145,30 @@ const LoginModal = {
   ]))
 }
 
-// TODO: add logout
+// TODO: add logout && token front hash
 const Login = {
   view: () => m('main', [
-    m('button', { onclick: () => stateChange.stateMutate('showLoginModal', true), class: 'button' }, 'Login'),
+    m('button', { onclick: () => stateChange.stateMutate('showLoginModal', true) }, 'Login'),
     stateChange.state.showLoginModal.value ? m(LoginModal) : null
   ])
+}
+
+// TODO: add acl button and name field
+const AddForm = {
+  oninit() {
+    this.name = null
+    this.acl = false
+  },
+  view() {
+  }
+}
+
+const CreateModal = {
+  view: () => m('.dialog', m('.dialogContent', [
+    m('h2', 'Login'),
+    m('button', { onclick: closeModal, class: 'dialog-close' }, 'Close'),
+    m(AddForm)
+  ]))
 }
 
 const Repo = {
@@ -159,6 +180,8 @@ const Repo = {
     return m('.repoList', [
       m('h4', `Repositories List from ${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
+      m('button', { onclick: () => stateChange.stateMutate('showCreateModal', true) }, 'Create Repo'),
+      stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [
         Object.keys(this.repoList).map(e => m('li', e, [m('button', { style: 'margin-left: 40px;' }, 'Edit')]))
