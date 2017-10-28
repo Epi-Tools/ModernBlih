@@ -1,2 +1,2 @@
 # blihweb
-Web App for EPITECH BLIH
+Web App, REST API for EPITECH BLIH
