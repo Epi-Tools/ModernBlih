@@ -53,6 +53,12 @@ const stateChange = {
     },
     showEditModal: {
       value: false
+    },
+    showDeleteModal: {
+      value: false
+    },
+    selectedRepo: {
+      value: ''
     }
   },
   history: [],
@@ -70,6 +76,7 @@ const closeModal = () => {
   stateChange.stateMutate('showLoginModal', false)
   stateChange.stateMutate('showCreateModal', false)
   stateChange.stateMutate('showEditModal', false)
+  stateChange.stateMutate('showDeleteModal', false)
   setStorage('state', stateChange.state)
   m.redraw()
 }
@@ -230,6 +237,19 @@ const EditForm = {
   }
 }
 
+// TODO: fix delete button position, top off edit
+const DeleteForm = {
+  oninit() {
+    this.name = stateChange.state.selectedRepo.value
+  },
+  view() {
+    return m('div', [
+      m('h3', `${this.name} ?`),
+      m('button', 'Are Your Sure ?')
+    ])
+  }
+}
+
 const getModalPattern = (form, title) => m('.dialog', m('.dialogContent', [
   m('h2', title),
   m('button', { onclick: closeModal, class: 'dialog-close' }, 'Close'),
@@ -242,6 +262,8 @@ const EditModal = { view: () => getModalPattern(EditForm, 'Edit Repo') }
 
 const LoginModal = { view: () => getModalPattern(LoginForm, 'Login') }
 
+const DeleteModal = { view: () => getModalPattern(DeleteForm, 'Delete') }
+
 const openModal = msg => {
   stateChange.stateMutate(msg, true)
   setStorage('state', stateChange.state)
@@ -253,12 +275,13 @@ const openEditModal = () => openModal('showEditModal')
 
 const openLoginModal = () => openModal('showLoginModal')
 
+const openDeleteModal = () => openModal('showDeleteModal')
+
 // FIXME: token front hash
 const Login = {
   view: () => m('main', [
     m('button', { onclick: openLoginModal }, 'Login'),
-    stateChange.state.showLoginModal.value ? m(LoginModal) : null,
-    stateChange.state.showCreateModal.value ? m(CreateModal) : null
+    stateChange.state.showLoginModal.value ? m(LoginModal) : null
   ])
 }
 
@@ -274,9 +297,14 @@ const Repo = {
       m('button', { onclick: logout, class: 'logout-button' }, 'Logout'),
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       stateChange.state.showEditModal.value ? m(EditModal) : null,
+      stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [
-        Object.keys(this.repoList).map(e => m('li', e, [ m('button', { onclick: openEditModal, class: 'edit-button' }, 'Edit') ]))
+        Object.keys(this.repoList).map(e => m('li', e, [ m('button', { onclick: openEditModal, class: 'edit-button' }, 'Edit'),
+          m('button', { onclick: () => {
+            stateChange.stateMutate('selectedRepo', e)
+            openDeleteModal()
+          }, class: 'delete-button' }, 'Delete') ]))
       ])
     ])
   }
@@ -300,7 +328,8 @@ const hanldeEscape = () => {
   const { state } = stateChange
   if (state.showCreateModal.value !== true &&
       state.showLoginModal.value !== true &&
-      state.showEditModal.value !== true) return
+      state.showEditModal.value !== true &&
+      state.showDeleteModal.value !== true) return
   closeModal()
 }
 
