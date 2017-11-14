@@ -31,7 +31,7 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, '../public')))
 
 app.use('/', index)
-app.use('/repo', repo)
+app.use('/api/repo', repo)
 app.use('/api/auth', apiAuth)
 
 // catch 404 and forward to error handler

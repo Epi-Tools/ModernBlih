@@ -94,6 +94,14 @@ const spin = R.compose(newSpin, getId)
 
 const stop = spin => spin.stop()
 
+// TODO: add error gestion
+const getRepositories = () => axios.post('/api/repo/list', { email: stateChange.state.username.value,
+  token: stateChange.state.token.value }).then(({ data }) => {
+  stateChange.stateMutate('repoList', data.body.repositories)
+  closeModal()
+  m.redraw()
+}).catch(console.error)
+
 const login = ctx => {
   const logSpin = spin('loginSpin')
   ctx.showLoginButton = false
@@ -156,10 +164,14 @@ const LoginForm = {
   }
 }
 
-const add = ctx => {
-  wesh(ctx.name)
-  wesh(ctx.acl)
-}
+// TODO: add loader
+const add = ctx => axios.post('/api/repo/create', {
+  name: ctx.name,
+  acl: ctx.acl,
+  email: stateChange.state.username.value,
+  token: stateChange.state.token.value })
+  .then(getRepositories)
+  .catch(console.error)
 
 const addSubmit = ctx => {
   const { error } = validateAdd(ctx)
@@ -245,7 +257,8 @@ const openLoginModal = () => openModal('showLoginModal')
 const Login = {
   view: () => m('main', [
     m('button', { onclick: openLoginModal }, 'Login'),
-    stateChange.state.showLoginModal.value ? m(LoginModal) : null
+    stateChange.state.showLoginModal.value ? m(LoginModal) : null,
+    stateChange.state.showCreateModal.value ? m(CreateModal) : null
   ])
 }
 
@@ -263,7 +276,7 @@ const Repo = {
       stateChange.state.showEditModal.value ? m(EditModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
       m('ul', [
-        Object.keys(this.repoList).map(e => m('li', e, [m('button', { onclick: openEditModal, class: 'edit-button' }, 'Edit')]))
+        Object.keys(this.repoList).map(e => m('li', e, [ m('button', { onclick: openEditModal, class: 'edit-button' }, 'Edit') ]))
       ])
     ])
   }
