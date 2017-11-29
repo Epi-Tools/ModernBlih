@@ -18,6 +18,8 @@ const validateAdd = R.compose(emailValid, tokenValid, nameValid, aclValid)
 
 const validateList = R.compose(emailValid, tokenValid)
 
+const validateDelete = R.compose(emailValid, tokenValid, nameValid)
+
 const addValidation = req => {
   const valid = validateAdd(req)
   const obj = {
@@ -35,6 +37,17 @@ const listValidation = req => {
   const obj = {
     email: valid.email,
     token: valid.token
+  }
+  if (valid.error) return { status: false, error: valid.error, ...obj }
+  return { status: true, ...obj }
+}
+
+const deleteValidation = req => {
+  const valid = validateDelete(req)
+  const obj = {
+    email: valid.email,
+    token: valid.token,
+    name: valid.name
   }
   if (valid.error) return { status: false, error: valid.error, ...obj }
   return { status: true, ...obj }
@@ -70,6 +83,20 @@ router.post('/create', (req, res) => {
       })
       return res.json({ token, body })
     }
+    res.status = 500
+    return res.json({ err })
+  })
+})
+
+router.post('/delete', (req, res) => {
+  const { status, error, email, token, name } = deleteValidation(req.body)
+  if (!status) {
+    res.status = 401
+    return res.json({ status: false, error })
+  }
+  const blih = new Blih(email, token)
+  return blih.deleteRepository(name, (err, body) => {
+    if (err === null || err === undefined) return res.json({ token, body })
     res.status = 500
     return res.json({ err })
   })

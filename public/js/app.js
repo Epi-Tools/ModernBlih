@@ -196,7 +196,7 @@ const AddForm = {
     this.acl = false
     this.showAddButton = true
     this.errorValidation = null
-  },  
+  }, 
   view() {
     return m('div', [
       m('label.label', { for: 'name' }, 'Name'),
@@ -215,37 +215,51 @@ const AddForm = {
 const edit = ctx => {
 }
 
+// TODO: (carlendev) use show"something" button
 const EditForm = {
   oninit() {
     this.name = null
-    this.acl = false
     this.showEditButton = true
     this.errorValidation = null
   },
   view() {
     return m('div', [
-      m('label.label', { for: 'name' }, 'Name'),
+      m('label.label', { for: 'name' }, 'List of logins'),
       m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
-      m('label.label', { for: 'acl' }, 'Acl ramassage-tek'),
-      m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
       m('br'),
-      this.showEditButton ? m('button', { onclick: () => addSubmit(this) }, 'Edit') : null,
+      this.showEditButton ? m('button', { onclick: () => edit(this) }, 'Update') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
       m('span', { id: 'AddSpin' })
     ])
-  }
+  } 
 }
 
-// TODO: fix delete button position, top off edit
+const mDelete = ctx => {
+  ctx.showDeleteButton = false
+  return axios.post('/api/repo/delete', { email: stateChange.state.username.value,
+    token: stateChange.state.token.value,
+    name: ctx.name }).then(() => axios.post('/api/repo/list', { email: stateChange.state.username.value,
+    token: stateChange.state.token.value }).then(({ data }) => {
+    stateChange.stateMutate('repoList', data.body.repositories)
+    ctx.showDeleteButton = true
+    closeModal()
+    m.redraw()
+  }).catch(console.error)).catch(e => {
+    console.error(e)
+    ctx.showDeleteButton = true
+  })
+}
+
 const DeleteForm = {
   oninit() {
     this.name = stateChange.state.selectedRepo.value
+    this.showDeleteButton = true
   },
   view() {
     return m('div', [
-      m('h3', `${this.name} ?`),
-      m('button', 'Are Your Sure ?')
+      m('h4', `${this.name} ?`),
+      this.showDeleteButton ? m('button', { onclick: () => mDelete(this), style: 'width: 100px;' }, 'Yes') : null
     ])
   }
 }
@@ -258,7 +272,7 @@ const getModalPattern = (form, title) => m('.dialog', m('.dialogContent', [
 
 const CreateModal = { view: () => getModalPattern(AddForm, 'Create Repo') }
 
-const EditModal = { view: () => getModalPattern(EditForm, 'Edit Repo') }
+const EditModal = { view: () => getModalPattern(EditForm, 'ACLs') }
 
 const LoginModal = { view: () => getModalPattern(LoginForm, 'Login') }
 
@@ -299,19 +313,17 @@ const Repo = {
       stateChange.state.showEditModal.value ? m(EditModal) : null,
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
-      m('div', [
-        m('ul', [
-          Object.keys(this.repoList).map(e => m('li', { class: 'repo-row' }, [
-            m('div', { style: 'display: inline-block; width: 550px;' }, e),
-            m('div', { style: 'display: inline-block; width: 150px;' }, [
-              m('button', { onclick: openEditModal, style: 'margin-right: 10px;' }, 'Edit'),
-              m('button', { onclick: () => {
-                stateChange.stateMutate('selectedRepo', e)
-                openDeleteModal()
-              } }, 'Delete')
-            ])
-          ]))
-        ])
+      m('ul', [
+        Object.keys(this.repoList).map(e => m('li', { class: 'repo-row' }, [
+          m('div', { style: 'display: inline-block; width: 550px;' }, e),
+          m('div', { style: 'display: inline-block; width: 150px;' }, [
+            m('button', { onclick: openEditModal, style: 'margin-right: 10px;' }, 'Acl'),
+            m('button', { onclick: () => {
+              stateChange.stateMutate('selectedRepo', e)
+              openDeleteModal()
+            } }, 'Delete')
+          ])
+        ]))
       ])
     ])
   }
