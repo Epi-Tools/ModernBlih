@@ -55,12 +55,6 @@
   top: 1;
 }
 
-.edit-button {
-  position: absolute;
-  right: 0;
-}
-
-.delete-button {
-  position: absolute;
-  right: 0;
+.repo-row {
+  width: 700px;
 }

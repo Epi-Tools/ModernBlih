@@ -196,14 +196,14 @@ const AddForm = {
     this.acl = false
     this.showAddButton = true
     this.errorValidation = null
-  },
+  },  
   view() {
     return m('div', [
       m('label.label', { for: 'name' }, 'Name'),
       m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
       m('label.label', { for: 'acl' }, 'Acl ramassage-tek'),
-      m('input', { id: 'acl', type: 'checkbox', onclick: () => this.acl = !this.acl, checked: this.acl }),
+      m('input', { id: 'acl', type: 'checkbox', oninput: () => this.acl = !this.acl, value: this.acl }),
       m('br'),
       this.showAddButton ? m('button', { onclick: () => addSubmit(this) }, 'Add') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
@@ -299,12 +299,19 @@ const Repo = {
       stateChange.state.showEditModal.value ? m(EditModal) : null,
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', 'Search'),
-      m('ul', [
-        Object.keys(this.repoList).map(e => m('li', e, [ m('button', { onclick: openEditModal, class: 'edit-button' }, 'Edit'),
-          m('button', { onclick: () => {
-            stateChange.stateMutate('selectedRepo', e)
-            openDeleteModal()
-          }, class: 'delete-button' }, 'Delete') ]))
+      m('div', [
+        m('ul', [
+          Object.keys(this.repoList).map(e => m('li', { class: 'repo-row' }, [
+            m('div', { style: 'display: inline-block; width: 550px;' }, e),
+            m('div', { style: 'display: inline-block; width: 150px;' }, [
+              m('button', { onclick: openEditModal, style: 'margin-right: 10px;' }, 'Edit'),
+              m('button', { onclick: () => {
+                stateChange.stateMutate('selectedRepo', e)
+                openDeleteModal()
+              } }, 'Delete')
+            ])
+          ]))
+        ])
       ])
     ])
   }
