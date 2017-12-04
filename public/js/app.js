@@ -59,6 +59,9 @@ const stateChange = {
     },
     selectedRepo: {
       value: ''
+    },
+    repoFilterList: {
+      value: []
     }
   },
   history: [],
@@ -212,12 +215,23 @@ const AddForm = {
   }
 }
 
+const getAcl = (e, ctx) => axios.post('/api/repo/acl/list', {
+  name: e,
+  email: stateChange.state.username.value,
+  token: stateChange.state.token.value })
+  .then(({ data }) => {
+    ctx.aclList = Object.keys(data.body).map(e => ({ name: e, acl: data.body[e] }))
+    m.redraw()
+  })
+  .catch(console.error)
+
 const edit = ctx => {
 }
 
-// TODO: (carlendev) use show"something" button
+// TODO: (carlendev) use show "something" button
 const EditForm = {
-  oninit() {
+  async oninit() {
+    getAcl(stateChange.state.selectedRepo.value, this)
     this.name = null
     this.showEditButton = true
     this.errorValidation = null
@@ -225,6 +239,8 @@ const EditForm = {
   view() {
     return m('div', [
       m('label.label', { for: 'name' }, 'List of logins'),
+      m('ul', this.aclList ? this.aclList.map(e => m('li', { style: 'list-style-type: none;' },
+        m('div', [ m('span', `${e.name} => `), m('strong', e.acl) ]))) : null),
       m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
       m('br'),
@@ -299,9 +315,21 @@ const Login = {
   ])
 }
 
+const toUper = (filter, ...e) => [ filter.toUpperCase(), e.map(e => ({ name: e.toUpperCase(), id: e })) ]
+
+const match = ([ filter, rest ]) => rest.filter(e => e.indexOf(filter) !== -1)
+
+const bakeRepoFilter = repos => stateChange.stateMutate('repoFilterList',
+  Object.keys(stateChange.state.repoList.value).filter(e => repos.find(user => e === user)))
+
+const bakeFilter = R.compose(bakeRepoFilter, match, toUper)
+
+const filter = (value, ctx) => new Promise(s => s(bakeFilter(value, ...Object.keys(ctx.repoList))))
+
 // TODO: search bar
 const Repo = {
-  view() {
+  filter: (e, ctx) => filter(e.target.value, ctx),
+  view({ state }) {
     this.repoList = stateChange.state.repoList.value
     this.username = stateChange.state.username.value
     return m('.repoList', [
@@ -312,12 +340,16 @@ const Repo = {
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       stateChange.state.showEditModal.value ? m(EditModal) : null,
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
-      m('input[type=text][placeholder=Search]', 'Search'),
+      m('input[type=text][placeholder=Search]', { style: 'width: 400px;', onkeyup: e => state.filter(e, this) }, 'Search'),
       m('ul', [
         Object.keys(this.repoList).map(e => m('li', { class: 'repo-row' }, [
           m('div', { style: 'display: inline-block; width: 550px;' }, e),
           m('div', { style: 'display: inline-block; width: 150px;' }, [
-            m('button', { onclick: openEditModal, style: 'margin-right: 10px;' }, 'Acl'),
+            m('button', { onclick: () => {
+              stateChange.stateMutate('selectedRepo', e)
+              openEditModal()
+            },
+            style: 'margin-right: 10px;' }, 'Acl'),
             m('button', { onclick: () => {
               stateChange.stateMutate('selectedRepo', e)
               openDeleteModal()

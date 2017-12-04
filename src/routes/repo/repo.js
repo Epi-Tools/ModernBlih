@@ -102,4 +102,18 @@ router.post('/delete', (req, res) => {
   })
 })
 
+router.post('/acl/list', (req, res) => {
+  const { status, error, email, token, name } = deleteValidation(req.body)
+  if (!status) {
+    res.status = 401
+    return res.json({ status: false, error })
+  }
+  const blih = new Blih(email, token)
+  return blih.getAcl(name, (err, body) => {
+    if (err === null || err === undefined) return res.json({ token, body })
+    res.status = 500
+    return res.json({ err })
+  })
+})
+
 module.exports = router
