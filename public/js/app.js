@@ -226,6 +226,7 @@ const getAcl = (e, ctx) => axios.post('/api/repo/acl/list', {
   .catch(console.error)
 
 const edit = (ctx, acl) => {
+  wesh(acl)
 }
 
 // TODO: (carlendev) use show "something" button
@@ -235,6 +236,7 @@ const EditForm = {
     this.name = null
     this.showEditButton = true
     this.errorValidation = null
+    this.acl = 'r'
   },
   view() {
     return m('div', [
@@ -244,15 +246,15 @@ const EditForm = {
           m('button', { onclick: () => edit(this, ''), class: 'delete-button' }, 'Delete') ]))) : null),
       m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
-      m('select', { id: 'acl', name: 'acl', required: 'required',
-        onchange: e => this.name = e.target.value }, [
+      m('select', { id: 'acl',name: 'acl', required: 'required',
+        onchange: e => this.acl = e.target.value }, [
         m('option', { value: 'r' }, 'r'),
         m('option', { value: 'w' }, 'w'),
         m('option', { value: 'rw' }, 'rw'),
         m('option', { value: '' }, 'Nothing')
       ]),
       m('br'),
-      this.showEditButton ? m('button', { onclick: () => edit(this) }, 'Update') : null,
+      this.showEditButton ? m('button', { onclick: () => edit(this, this.acl) }, 'Update') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
       m('span', { id: 'AddSpin' })
     ])
