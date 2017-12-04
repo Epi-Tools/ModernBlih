@@ -225,7 +225,7 @@ const getAcl = (e, ctx) => axios.post('/api/repo/acl/list', {
   })
   .catch(console.error)
 
-const edit = ctx => {
+const edit = (ctx, acl) => {
 }
 
 // TODO: (carlendev) use show "something" button
@@ -240,9 +240,17 @@ const EditForm = {
     return m('div', [
       m('label.label', { for: 'name' }, 'List of logins'),
       m('ul', this.aclList ? this.aclList.map(e => m('li', { style: 'list-style-type: none;' },
-        m('div', [ m('span', `${e.name} => `), m('strong', e.acl) ]))) : null),
+        m('div', [ m('span', `${e.name}\t | `), m('strong', e.acl),
+          m('button', { onclick: () => edit(this, ''), class: 'delete-button' }, 'Delete') ]))) : null),
       m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
+      m('select', { id: 'acl', name: 'acl', required: 'required',
+        onchange: e => this.name = e.target.value }, [
+        m('option', { value: 'r' }, 'r'),
+        m('option', { value: 'w' }, 'w'),
+        m('option', { value: 'rw' }, 'rw'),
+        m('option', { value: '' }, 'Nothing')
+      ]),
       m('br'),
       this.showEditButton ? m('button', { onclick: () => edit(this) }, 'Update') : null,
       this.errorValidation ? m('p', { style: 'color: #982c61' }, this.errorValidation) : null,
@@ -288,7 +296,7 @@ const getModalPattern = (form, title) => m('.dialog', m('.dialogContent', [
 
 const CreateModal = { view: () => getModalPattern(AddForm, 'Create Repo') }
 
-const EditModal = { view: () => getModalPattern(EditForm, 'ACLs') }
+const EditModal = { view: () => getModalPattern(EditForm, 'ACLS') }
 
 const LoginModal = { view: () => getModalPattern(LoginForm, 'Login') }
 
@@ -341,8 +349,8 @@ const Repo = {
       stateChange.state.showEditModal.value ? m(EditModal) : null,
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', { style: 'width: 400px;', onkeyup: e => state.filter(e, this) }, 'Search'),
-      m('ul', [
-        Object.keys(this.repoList).map(e => m('li', { class: 'repo-row' }, [
+      m('ul', { style: 'padding-left: 0;' }, [
+        Object.keys(this.repoList).map(e => m('li', { class: 'repo-row', style: 'list-style-type: none;' }, [
           m('div', { style: 'display: inline-block; width: 550px;' }, e),
           m('div', { style: 'display: inline-block; width: 150px;' }, [
             m('button', { onclick: () => {
@@ -353,8 +361,9 @@ const Repo = {
             m('button', { onclick: () => {
               stateChange.stateMutate('selectedRepo', e)
               openDeleteModal()
-            } }, 'Delete')
-          ])
+            } }, 'Delete'),
+          ]),
+          m('hr')
         ]))
       ])
     ])
