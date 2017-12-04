@@ -12,13 +12,20 @@ const emailValid = data => emailReg.test(data.email) ? { value: true, ...data } 
 
 const nameValid = data => data.token.length >= 2 ? { value: true, ...data } : { value: false, error: 'Wrong Repo Name', ...data }
 
-const aclValid = data => data.acl === true || data.acl === false ? { value: true, ...data } : { value: false, error: 'Wrong Acl', ...data }
+const repoNameValid = data => data.token.length >= 2 ? { value: true, ...data } : { value: false, error: 'Wrong Repo Name', ...data }
+
+const aclValid = data => data.acl === 'r' ||
+  data.acl === 'w' ||
+  data.acl === 'rw' ||
+  data.acl === '' ? { value: true, ...data } : { value: false, error: 'Wrong Acl', ...data }
 
 const validateAdd = R.compose(emailValid, tokenValid, nameValid, aclValid)
 
 const validateList = R.compose(emailValid, tokenValid)
 
 const validateDelete = R.compose(emailValid, tokenValid, nameValid)
+
+const validateAcl = R.compose(emailValid, tokenValid, nameValid, aclValid, repoNameValid)
 
 const addValidation = req => {
   const valid = validateAdd(req)
@@ -48,6 +55,19 @@ const deleteValidation = req => {
     email: valid.email,
     token: valid.token,
     name: valid.name
+  }
+  if (valid.error) return { status: false, error: valid.error, ...obj }
+  return { status: true, ...obj }
+}
+
+const aclValidation = req => {
+  const valid = validateAcl(req)
+  const obj = {
+    email: valid.email,
+    token: valid.token,
+    name: valid.name,
+    acl: valid.acl,
+    repoName: valid.repoName
   }
   if (valid.error) return { status: false, error: valid.error, ...obj }
   return { status: true, ...obj }
@@ -96,6 +116,20 @@ router.post('/delete', (req, res) => {
   }
   const blih = new Blih(email, token)
   return blih.deleteRepository(name, (err, body) => {
+    if (err === null || err === undefined) return res.json({ token, body })
+    res.status = 500
+    return res.json({ err })
+  })
+})
+
+router.post('/acl/update', (req, res) => {
+  const { status, error, email, token, name, acl, repoName } = aclValidation(req.body)
+  if (!status) {
+    res.status = 401
+    return res.json({ status: false, error })
+  }
+  const blih = new Blih(email, token)
+  return blih.setAcl(repoName, name, acl, (err, body) => {
     if (err === null || err === undefined) return res.json({ token, body })
     res.status = 500
     return res.json({ err })

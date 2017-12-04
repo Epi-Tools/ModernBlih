@@ -221,12 +221,21 @@ const getAcl = (e, ctx) => axios.post('/api/repo/acl/list', {
   token: stateChange.state.token.value })
   .then(({ data }) => {
     ctx.aclList = Object.keys(data.body).map(e => ({ name: e, acl: data.body[e] }))
+    ctx.showEditButton = true
     m.redraw()
   })
   .catch(console.error)
 
 const edit = (ctx, acl) => {
-  wesh(acl)
+  ctx.showEditButton = false
+  return axios.post('/api/repo/acl/update', {
+    name: ctx.name,
+    repoName: stateChange.state.selectedRepo.value,
+    email: stateChange.state.username.value,
+    token: stateChange.state.token.value,
+    acl })
+    .then(() => getAcl(stateChange.state.selectedRepo.value, ctx))
+    .catch(console.error)
 }
 
 // TODO: (carlendev) use show "something" button
@@ -243,10 +252,13 @@ const EditForm = {
       m('label.label', { for: 'name' }, 'List of logins'),
       m('ul', this.aclList ? this.aclList.map(e => m('li', { style: 'list-style-type: none;' },
         m('div', [ m('span', `${e.name}\t | `), m('strong', e.acl),
-          m('button', { onclick: () => edit(this, ''), class: 'delete-button' }, 'Delete') ]))) : null),
+          m('button', { onclick: () =>  {
+            this.name = e.name
+            edit(this, '')
+          }, class: 'delete-button' }, 'Delete') ]))) : null),
       m('input.input[type=text][placeholder=Name]', { id: 'name', name: 'name', required: 'required',
         onchange: e => this.name = e.target.value }),
-      m('select', { id: 'acl',name: 'acl', required: 'required',
+      m('select', { id: 'acl', name: 'acl', required: 'required',
         onchange: e => this.acl = e.target.value }, [
         m('option', { value: 'r' }, 'r'),
         m('option', { value: 'w' }, 'w'),
