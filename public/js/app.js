@@ -104,10 +104,32 @@ const spin = R.compose(newSpin, getId)
 
 const stop = spin => spin.stop()
 
+let filteredRepo = {}
+
+let filterRepo = ''
+
+const toUper = (filter, ...e) => {
+  filterRepo = filter
+  return [ filter.toUpperCase(), e.map(e => ({ name: e.toUpperCase(), id: e })) ]
+}
+
+const match = ([ filter, rest ]) => rest.filter(e => e.name.indexOf(filter) !== -1)
+
+const bakeRepoFilter = repos => {
+  filteredRepo = {}
+  repos.map(e => filteredRepo[e.id] = e.id)
+  m.redraw()
+}
+
+const bakeFilter = R.compose(bakeRepoFilter, match, toUper)
+
+const filter = (value, ctx) => new Promise(s => s(bakeFilter(value, ...Object.keys(ctx.repoList))))
+
 // TODO: add error gestion
 const getRepositories = () => axios.post('/api/repo/list', { email: stateChange.state.username.value,
   token: stateChange.state.token.value }).then(({ data }) => {
   stateChange.stateMutate('repoList', data.body.repositories)
+  filter(filterRepo, { repoList: data.body.repositories })
   closeModal()
   m.redraw()
 }).catch(console.error)
@@ -280,6 +302,7 @@ const mDelete = ctx => {
     name: ctx.name }).then(() => axios.post('/api/repo/list', { email: stateChange.state.username.value,
     token: stateChange.state.token.value }).then(({ data }) => {
     stateChange.stateMutate('repoList', data.body.repositories)
+    filter(filterRepo, { repoList: data.body.repositories })
     ctx.showDeleteButton = true
     closeModal()
     m.redraw()
@@ -336,22 +359,6 @@ const Login = {
     stateChange.state.showLoginModal.value ? m(LoginModal) : null
   ])
 }
-
-const toUper = (filter, ...e) => [ filter.toUpperCase(), e.map(e => ({ name: e.toUpperCase(), id: e })) ]
-
-const match = ([ filter, rest ]) => rest.filter(e => e.name.indexOf(filter) !== -1)
-
-let filteredRepo = {}
-
-const bakeRepoFilter = repos => {
-  filteredRepo = {}
-  repos.map(e => filteredRepo[e.id] = e.id)
-  m.redraw()
-}
-
-const bakeFilter = R.compose(bakeRepoFilter, match, toUper)
-
-const filter = (value, ctx) => new Promise(s => s(bakeFilter(value, ...Object.keys(ctx.repoList))))
 
 // TODO: search bar
 const Repo = {
