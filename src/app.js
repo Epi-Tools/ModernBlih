@@ -56,6 +56,6 @@ const handleError = (err) => {
   process.exit(1)
 }
 
-const listenHandler = err => err ? handleError(err) : wesh(`App listen to ${PORT}`)
+const listenHandler = err => err ? handleError(err) : wesh(`App listen to ${PORT || 3000}`)
 
-server.listen(PORT, listenHandler)
+server.listen(PORT || 3000, listenHandler)
