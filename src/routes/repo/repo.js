@@ -98,7 +98,7 @@ router.post('/create', (req, res) => {
   const blih = new Blih(email, token)
   return blih.createRepository(name, (err, body) => {
     if (err === null || err === undefined) {
-      if (acl) return blih.setAcl(name, email, 'r', (_err, _body) => {
+      if (acl) return blih.setAcl(name, 'ramassage-tek', 'r', (_err, _body) => {
         if (err === null || err === undefined) return res.json({ token, _body })
         res.status = 500
         return res.json({ err })
