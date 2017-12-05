@@ -14,12 +14,14 @@ const nameValid = data => data.token.length >= 2 ? { value: true, ...data } : { 
 
 const repoNameValid = data => data.token.length >= 2 ? { value: true, ...data } : { value: false, error: 'Wrong Repo Name', ...data }
 
+const aclValidR = data => data.acl === true || data.acl === false ? { value: true, ...data } : { value: false, error: 'Wrong acl', ...data }
+
 const aclValid = data => data.acl === 'r' ||
   data.acl === 'w' ||
   data.acl === 'rw' ||
   data.acl === '' ? { value: true, ...data } : { value: false, error: 'Wrong Acl', ...data }
 
-const validateAdd = R.compose(emailValid, tokenValid, nameValid, aclValid)
+const validateAdd = R.compose(emailValid, tokenValid, nameValid, aclValidR)
 
 const validateList = R.compose(emailValid, tokenValid)
 

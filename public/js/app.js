@@ -61,7 +61,7 @@ const stateChange = {
       value: ''
     },
     repoFilterList: {
-      value: []
+      value: {}
     }
   },
   history: [],
@@ -339,10 +339,15 @@ const Login = {
 
 const toUper = (filter, ...e) => [ filter.toUpperCase(), e.map(e => ({ name: e.toUpperCase(), id: e })) ]
 
-const match = ([ filter, rest ]) => rest.filter(e => e.indexOf(filter) !== -1)
+const match = ([ filter, rest ]) => rest.filter(e => e.name.indexOf(filter) !== -1)
 
-const bakeRepoFilter = repos => stateChange.stateMutate('repoFilterList',
-  Object.keys(stateChange.state.repoList.value).filter(e => repos.find(user => e === user)))
+let filteredRepo = {}
+
+const bakeRepoFilter = repos => {
+  filteredRepo = {}
+  repos.map(e => filteredRepo[e.id] = e.id)
+  m.redraw()
+}
 
 const bakeFilter = R.compose(bakeRepoFilter, match, toUper)
 
@@ -354,6 +359,9 @@ const Repo = {
   view({ state }) {
     this.repoList = stateChange.state.repoList.value
     this.username = stateChange.state.username.value
+    this.repoFilterList = filteredRepo
+    wesh('ok')
+    wesh(filteredRepo)
     return m('.repoList', [
       m('h4', `Repositories List from ${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
@@ -364,21 +372,22 @@ const Repo = {
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', { style: 'width: 400px;', onkeyup: e => state.filter(e, this) }, 'Search'),
       m('ul', { style: 'padding-left: 0;' }, [
-        Object.keys(this.repoList).map(e => m('li', { class: 'repo-row', style: 'list-style-type: none;' }, [
-          m('div', { style: 'display: inline-block; width: 550px;' }, e),
-          m('div', { style: 'display: inline-block; width: 150px;' }, [
-            m('button', { onclick: () => {
-              stateChange.stateMutate('selectedRepo', e)
-              openEditModal()
-            },
-            style: 'margin-right: 10px;' }, 'Acl'),
-            m('button', { onclick: () => {
-              stateChange.stateMutate('selectedRepo', e)
-              openDeleteModal()
-            } }, 'Delete'),
-          ]),
-          m('hr')
-        ]))
+        Object.keys(filteredRepo.length ? filteredRepo : this.repoList)
+          .map(e => m('li', { class: 'repo-row', style: 'list-style-type: none;' }, [
+            m('div', { style: 'display: inline-block; width: 550px;' }, e),
+            m('div', { style: 'display: inline-block; width: 150px;' }, [
+              m('button', { onclick: () => {
+                stateChange.stateMutate('selectedRepo', e)
+                openEditModal()
+              },
+              style: 'margin-right: 10px;' }, 'Acl'),
+              m('button', { onclick: () => {
+                stateChange.stateMutate('selectedRepo', e)
+                openDeleteModal()
+              } }, 'Delete'),
+            ]),
+            m('hr')
+          ]))
       ])
     ])
   }
