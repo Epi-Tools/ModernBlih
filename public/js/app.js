@@ -360,8 +360,6 @@ const Repo = {
     this.repoList = stateChange.state.repoList.value
     this.username = stateChange.state.username.value
     this.repoFilterList = filteredRepo
-    wesh('ok')
-    wesh(filteredRepo)
     return m('.repoList', [
       m('h4', `Repositories List from ${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
@@ -372,7 +370,7 @@ const Repo = {
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', { style: 'width: 400px;', onkeyup: e => state.filter(e, this) }, 'Search'),
       m('ul', { style: 'padding-left: 0;' }, [
-        Object.keys(filteredRepo.length ? filteredRepo : this.repoList)
+        Object.keys(Object.keys(filteredRepo).length ? filteredRepo : this.repoList)
           .map(e => m('li', { class: 'repo-row', style: 'list-style-type: none;' }, [
             m('div', { style: 'display: inline-block; width: 550px;' }, e),
             m('div', { style: 'display: inline-block; width: 150px;' }, [
