@@ -212,7 +212,10 @@ const addSubmit = ctx => {
     return
   }
   ctx.errorValidation = null
+  ctx.showAddButton = false
   add(ctx)
+    .then(() => ctx.showAddButton = true)
+    .catch(() => ctx.showAddButton = true)
 }
 
 const AddForm = {
@@ -305,7 +308,7 @@ const mDelete = ctx => {
     filter(filterRepo, { repoList: data.body.repositories })
     ctx.showDeleteButton = true
     closeModal()
-    m.redraw()
+    return setStorage('state', stateChange.state).then(() => m.redraw())
   }).catch(console.error)).catch(e => {
     console.error(e)
     ctx.showDeleteButton = true
