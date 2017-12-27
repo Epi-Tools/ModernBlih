@@ -1,9 +1,9 @@
 {
   "name": "blihweb",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "nodemon --watch src --exec 'node src/app.js'"
+    "start": "node src/app.js"
   },
   "dependencies": {
     "body-parser": "~1.17.1",
