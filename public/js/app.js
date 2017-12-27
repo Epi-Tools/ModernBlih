@@ -31,6 +31,8 @@ mx.storage(mx.DEFAULT_STORAGE_NAME, mx.SESSION_STORAGE)
 
 const storage = mx.storage()
 
+const setStorage = (key, props) => new Promise(s => s(storage.set('state', props)))
+
 const stateChange = {
   state: {
     username: {
@@ -70,10 +72,9 @@ const stateChange = {
     props = { value: props }
     this.history.push({ action: name, value: props, old: Object.assign({}, this.state) })
     this.state[name] = Object.assign(this.state[name], props)
+    setStorage('state', stateChange.state)
   }
 }
-
-const setStorage = (key, props) => new Promise(s => s(storage.set('state', props)))
 
 const closeModal = () => {
   stateChange.stateMutate('showLoginModal', false)
@@ -108,6 +109,8 @@ let filteredRepo = {}
 
 let filterRepo = ''
 
+let searchValue = ''
+
 const toUper = (filter, ...e) => {
   filterRepo = filter
   return [ filter.toUpperCase(), e.map(e => ({ name: e.toUpperCase(), id: e })) ]
@@ -123,7 +126,10 @@ const bakeRepoFilter = repos => {
 
 const bakeFilter = R.compose(bakeRepoFilter, match, toUper)
 
-const filter = (value, ctx) => new Promise(s => s(bakeFilter(value, ...Object.keys(ctx.repoList))))
+const filter = (value, ctx) => {
+  searchValue = value
+  return new Promise(s => s(bakeFilter(value, ...Object.keys(ctx.repoList))))
+}
 
 // TODO: add error gestion
 const getRepositories = () => axios.post('/api/repo/list', { email: stateChange.state.username.value,
@@ -380,7 +386,7 @@ const Repo = {
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
       m('input[type=text][placeholder=Search]', { style: 'width: 400px;', onkeyup: e => state.filter(e, this) }, 'Search'),
       m('ul', { style: 'padding-left: 0;' }, [
-        Object.keys(Object.keys(filteredRepo).length ? filteredRepo : this.repoList)
+        Object.keys(Object.keys(filteredRepo).length || (searchValue !== '' && searchValue) ? filteredRepo : this.repoList)
           .map(e => m('li', { class: 'repo-row', style: 'list-style-type: none;' }, [
             m('div', { style: 'display: inline-block; width: 550px;' }, e),
             m('div', { style: 'display: inline-block; width: 150px;' }, [
