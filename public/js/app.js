@@ -1,3 +1,19 @@
+require("babel-core/register")
+require("babel-polyfill")
+
+import '../css/style.css'
+import '../css/sakura.min.css'
+
+const axios = require('axios')
+const m = require('mithril')
+
+window.m = m
+
+require('./mithril-storage')
+const Spinner = require('./spin.min')
+
+const R = require('ramda')
+
 const root = document.getElementById('app')
 
 const wesh = console.log
