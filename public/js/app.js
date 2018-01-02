@@ -393,10 +393,11 @@ const Repo = {
     this.username = stateChange.state.username.value
     this.repoFilterList = filteredRepo
     return m('.repoList', [
-      m('h4', `Repositories List from ${this.username}`),
+      m('button', { onclick: logout, class: 'logout-button' }, 'Logout'),
+      m('h4', `Repositories List from`),
+      m('h4', `${this.username}`),
       m('h6', `Repositories: ${Object.keys(this.repoList).length}`),
       m('button', { onclick: openCreateModal, class: 'create-button' }, 'Create Repo'),
-      m('button', { onclick: logout, class: 'logout-button' }, 'Logout'),
       stateChange.state.showCreateModal.value ? m(CreateModal) : null,
       stateChange.state.showEditModal.value ? m(EditModal) : null,
       stateChange.state.showDeleteModal.value ? m(DeleteModal) : null,
