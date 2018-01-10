@@ -1,5 +1,4 @@
-# ModernBlih
-## Preprod [here](https://blih-preprod.cleverapps.io)
+# [ModernBlih](https://blih-preprod.cleverapps.io)
 
 Web App, REST API for EPITECH BLIH
 
